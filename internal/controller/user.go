@@ -12,12 +12,39 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func UserInfo(c echo.Context) error {
+	_, err := utils.ParseToken(c.Request().Header.Get("Authorization"))
+	if err != nil {
+		return echo.ErrUnauthorized
+	}
+	var req model.User
+	if err := c.Bind(&req); err != nil {
+		return echo.ErrBadRequest
+	}
+	var user *model.User
+	if req.ID != 0 {
+		user, err = model.GetUserByID(req.ID)
+	} else if req.Username != "" {
+		user, err = model.GetUserByUsername(req.Username)
+	} else {
+		return echo.ErrBadRequest
+	}
+	if err != nil {
+		return echo.ErrInternalServerError
+	}
+	user.Password = ""
+	return c.JSON(200, &param.Resp{
+		Success: true,
+		Data:    user,
+	})
+}
+
 func UserLogin(c echo.Context) error {
 	var user model.User
 	if err := c.Bind(&user); err != nil {
 		return echo.ErrBadRequest
 	}
-	result, err := model.GetUser(user.Username)
+	result, err := model.GetUserByUsername(user.Username)
 	if err != nil {
 		return echo.ErrUnauthorized
 	}
@@ -26,7 +53,7 @@ func UserLogin(c echo.Context) error {
 	}
 	claims := utils.JWTClaims{
 		UID:   result.ID,
-		Admin: true,
+		Admin: false,
 		Exp:   config.Config.Jwt.Expire + jwt.TimeFunc().Unix(),
 	}
 	token, err := utils.GenerateToken(claims)
@@ -49,6 +76,23 @@ func UserRegister(c echo.Context) error {
 	}
 	user.Password = fmt.Sprintf("%x", md5.Sum([]byte(user.Password)))
 	if err := model.AddUser(&user); err != nil {
+		return echo.ErrInternalServerError
+	}
+	return c.JSON(200, &param.Resp{
+		Success: true,
+	})
+}
+
+func UserDelete(c echo.Context) error {
+	var user model.User
+	claims, err := utils.ParseToken(c.Request().Header.Get("Authorization"))
+	if err != nil || !claims.Admin {
+		return echo.ErrUnauthorized
+	}
+	if err := c.Bind(&user); err != nil {
+		return echo.ErrBadRequest
+	}
+	if err := model.DeleteUser(user.ID); err != nil {
 		return echo.ErrInternalServerError
 	}
 	return c.JSON(200, &param.Resp{

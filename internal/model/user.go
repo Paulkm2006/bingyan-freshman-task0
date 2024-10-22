@@ -1,10 +1,9 @@
 package model
 
 type User struct {
-	ID       int    `json:"id" gorm:"primaryKey;autoIncrement;index"`
+	ID       int    `json:"id" gorm:"primaryKey;autoIncrement;index" query:"id"`
 	Username string `json:"username" gorm:"unique"`
 	Password string `json:"password"`
-	Role     string `json:"role"`
 	Email    string `json:"email"`
 	Nickname string `json:"nickname,omitempty"`
 }
@@ -37,7 +36,14 @@ func DeleteUser(id int) error {
 	return result.Error
 }
 
-func GetUser(username string) (*User, error) {
+func GetUserByID(id int) (*User, error) {
+	// Get user
+	user := &User{}
+	result := db.Where("id = ?", id).First(user)
+	return user, result.Error
+}
+
+func GetUserByUsername(username string) (*User, error) {
 	// Get user
 	user := &User{}
 	result := db.Where("username = ?", username).First(user)
