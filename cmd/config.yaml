@@ -1,0 +1,11 @@
+jwt:
+  secret: 114514
+  expire: 360000
+server:
+  port: 8080
+  ver: v1
+admin:
+  username: admin
+  password: 114514
+postgres:
+  dsn: postgresql://ubgmygsf3skhhylzfjoh:uxj708QkzN2gFK7MR48YNvlGJSVkdQ@bf2pftbrvh0f0pyzjswy-postgresql.services.clever-cloud.com:50013/bf2pftbrvh0f0pyzjswy

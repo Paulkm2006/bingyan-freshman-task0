@@ -1,10 +1,23 @@
 package model
 
+import (
+	"bingyan-freshman-task0/internal/config"
+	"crypto/md5"
+	"fmt"
+)
+
 type Admin struct {
 	ID       int    `json:"id" gorm:"primaryKey;autoIncrement"`
 	Username string `json:"username" gorm:"unique"`
 	Password string `json:"password"`
-	Role     string `json:"role"`
+}
+
+func AddDefaultAdmin() {
+	admin := &Admin{
+		Username: config.Config.Admin.Username,
+		Password: fmt.Sprintf("%x", md5.Sum([]byte(config.Config.Admin.Password))),
+	}
+	db.Model(&Admin{}).Create(admin)
 }
 
 func AddAdmin(adminUser *Admin) error {
@@ -28,6 +41,6 @@ func DeleteAdmin(id int) error {
 
 func GetAdmin(username string) (*Admin, error) {
 	adminUser := &Admin{}
-	result := db.Where("username = ?, role = ?", username, "admin").First(adminUser)
+	result := db.Where("username = ?", username).First(adminUser)
 	return adminUser, result.Error
 }

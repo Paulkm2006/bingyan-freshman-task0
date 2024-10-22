@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bingyan-freshman-task0/internal/config"
+	"log"
 
 	"github.com/golang-jwt/jwt"
 )
@@ -14,6 +15,8 @@ type JWTClaims struct {
 
 func (claim JWTClaims) Valid() error {
 	if jwt.TimeFunc().Unix() > claim.Exp {
+		log.Println(jwt.TimeFunc().Unix())
+		log.Println(claim.Exp)
 		return jwt.NewValidationError("token expired", jwt.ValidationErrorExpired)
 	}
 	return nil
@@ -40,9 +43,6 @@ func ParseToken(tokenString string) (*JWTClaims, error) {
 	claims, ok := token.Claims.(*JWTClaims)
 	if !ok {
 		return nil, jwt.NewValidationError("invalid token", jwt.ValidationErrorMalformed)
-	}
-	if claims.Valid() != nil {
-		return nil, jwt.NewValidationError("token expired", jwt.ValidationErrorExpired)
 	}
 	return claims, nil
 }

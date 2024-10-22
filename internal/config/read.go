@@ -14,10 +14,11 @@ type ConfigStruct struct {
 }
 type JwtConfig struct {
 	Secret string `yaml:"secret"`
-	Expire int64  `yaml:"exp"`
+	Expire int64  `yaml:"expire"`
 }
 type ServerConfig struct {
 	Port string `yaml:"port"`
+	Ver  string `yaml:"ver"`
 }
 type PostgresConfig struct {
 	Dsn string `yaml:"dsn"`
@@ -32,7 +33,7 @@ var Config ConfigStruct
 func InitConfig() {
 	var configFile []byte
 	var err error
-	configFile, err = os.ReadFile("config/config.yaml")
+	configFile, err = os.ReadFile("config.yaml")
 	if err != nil {
 		panic(err)
 	}
