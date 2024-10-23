@@ -1,5 +1,9 @@
 package model
 
+import (
+	"errors"
+)
+
 type User struct {
 	ID       int    `json:"id" gorm:"primaryKey;autoIncrement;index" query:"id"`
 	Username string `json:"username" gorm:"unique"`
@@ -7,6 +11,8 @@ type User struct {
 	Email    string `json:"email"`
 	Nickname string `json:"nickname,omitempty"`
 }
+
+var ErrUserNotFound = errors.New("user not found")
 
 func AddUser(user *User) error {
 	// Add user
@@ -40,6 +46,9 @@ func GetUserByID(id int) (*User, error) {
 	// Get user
 	user := &User{}
 	result := db.Where("id = ?", id).First(user)
+	if result.Error != nil && result.Error.Error() == "record not found" {
+		return nil, ErrUserNotFound
+	}
 	return user, result.Error
 }
 
@@ -47,5 +56,8 @@ func GetUserByUsername(username string) (*User, error) {
 	// Get user
 	user := &User{}
 	result := db.Where("username = ?", username).First(user)
+	if result.Error != nil && result.Error.Error() == "record not found" {
+		return nil, ErrUserNotFound
+	}
 	return user, result.Error
 }

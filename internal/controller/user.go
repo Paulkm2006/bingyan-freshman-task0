@@ -29,7 +29,9 @@ func UserInfo(c echo.Context) error {
 	} else {
 		return echo.ErrBadRequest
 	}
-	if err != nil {
+	if err == model.ErrUserNotFound {
+		return echo.ErrNotFound
+	} else if err != nil {
 		return echo.ErrInternalServerError
 	}
 	user.Password = ""
@@ -78,7 +80,7 @@ func UserRegister(c echo.Context) error {
 	if err := model.AddUser(&user); err != nil {
 		return echo.ErrInternalServerError
 	}
-	return c.JSON(200, &param.Resp{
+	return c.JSON(201, &param.Resp{
 		Success: true,
 	})
 }
