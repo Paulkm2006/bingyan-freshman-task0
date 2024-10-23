@@ -37,18 +37,18 @@ paths:
       description: Get info of a user whether by username or id
       security:
         - bearerAuth: [user,admin]
-      requestBody:
-        required: true
-        content:
-          application/json:
+      parameters:
+        oneOf:
+          - name: username
+            in: query
+            required: false
             schema:
-              type: object
-              properties:
-                oneOf:
-                  - username:
-                      type: string
-                  - id:
-                      type: integer
+              type: string
+          - name: id
+            in: query
+            required: false
+            schema:
+              type: integer
       responses:
         '200':
           description: The specified user info
