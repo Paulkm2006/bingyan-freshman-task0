@@ -77,7 +77,10 @@ func UserRegister(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 	user.Password = fmt.Sprintf("%x", md5.Sum([]byte(user.Password)))
-	if err := model.AddUser(&user); err != nil {
+	err := model.AddUser(&user)
+	if err == model.ErrUserAlreadyExist {
+		return echo.ErrConflict
+	} else if err != nil {
 		return echo.ErrInternalServerError
 	}
 	return c.JSON(201, &param.Resp{
@@ -94,7 +97,10 @@ func UserDelete(c echo.Context) error {
 	if err := c.Bind(&user); err != nil {
 		return echo.ErrBadRequest
 	}
-	if err := model.DeleteUser(user.ID); err != nil {
+	err = model.DeleteUser(user.ID)
+	if err == model.ErrUserNotFound {
+		return echo.ErrNotFound
+	} else if err != nil {
 		return echo.ErrInternalServerError
 	}
 	return c.JSON(200, &param.Resp{

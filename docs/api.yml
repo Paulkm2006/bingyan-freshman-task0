@@ -28,12 +28,15 @@ paths:
       responses:
         '201':
           description: User created
+        '409':
+          description: User already exists
         '400':
           description: Invalid input
     get:
-      summary: Get user info, whether by username or id
+      summary: Get user info
+      description: Get info of a user whether by username or id
       security:
-        - bearerAuth: []
+        - bearerAuth: [user,admin]
       requestBody:
         required: true
         content:
@@ -41,10 +44,11 @@ paths:
             schema:
               type: object
               properties:
-                username:
-                  type: string
-                id:
-                  type: integer
+                oneOf:
+                  - username:
+                      type: string
+                  - id:
+                      type: integer
       responses:
         '200':
           description: The specified user info
@@ -73,9 +77,112 @@ paths:
                       nickname:
                         type: string
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/UnauthorizedError'
         '404':
           description: User not found
+    delete:
+      summary: Delete a user
+      description: Delete a user by username or id
+      security:
+        - bearerAuth: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                    type: integer
+      responses:
+        '200':
+          description: User deleted
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: User not found
+  /user/token:
+    post:
+      summary: Get access token for user
+      description: Get access token by username and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  required: true
+                  type: string
+                password:
+                  required: true
+                  type: string
+      responses:
+        '200':
+          description: Access token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  msg:
+                    type: string
+                    description: Always empty
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                      expires_in:
+                        type: integer
+        '401':
+          description: Invalid username or password
+        '400':
+          description: Invalid input
+  /admin/token:
+    post:
+      summary: Get access token for admin
+      description: Get access token by username and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  required: true
+                  type: string
+                password:
+                  required: true
+                  type: string
+      responses:
+        '200':
+          description: Access token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  msg:
+                    type: string
+                    description: Always empty
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                      expires_in:
+                        type: integer
+        '401':
+          description: Invalid username or password
+        '400':
+          description: Invalid input
 
 components:
   securitySchemes:
@@ -83,3 +190,6 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+  responses:
+    UnauthorizedError:
+      description: Access token is missing, invalid, expired or does not have the required permissions

@@ -13,9 +13,14 @@ type User struct {
 }
 
 var ErrUserNotFound = errors.New("user not found")
+var ErrUserAlreadyExist = errors.New("user already exist")
 
 func AddUser(user *User) error {
 	// Add user
+	_, err := GetUserByUsername(user.Username)
+	if err == nil {
+		return ErrUserAlreadyExist
+	}
 	resultUser := db.Model(&User{}).Create(user)
 	if resultUser.Error != nil {
 		return resultUser.Error
@@ -38,6 +43,10 @@ func UpdateUser(user *User) error {
 
 func DeleteUser(id int) error {
 	// Delete user
+	_, err := GetUserByID(id)
+	if err != nil {
+		return err
+	}
 	result := db.Delete(&User{}, id)
 	return result.Error
 }
