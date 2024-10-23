@@ -38,17 +38,16 @@ paths:
       security:
         - bearerAuth: [user,admin]
       parameters:
-        oneOf:
-          - name: username
-            in: query
-            required: false
-            schema:
-              type: string
-          - name: id
-            in: query
-            required: false
-            schema:
-              type: integer
+        - name: username
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: id
+          in: query
+          required: false
+          schema:
+            type: integer
       responses:
         '200':
           description: The specified user info
@@ -85,15 +84,12 @@ paths:
       description: Delete a user by username or id
       security:
         - bearerAuth: [admin]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id:
-                    type: integer
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: User deleted
