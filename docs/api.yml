@@ -32,10 +32,8 @@ paths:
           description: Invalid input
     get:
       summary: Get user info, whether by username or id
-      requestHeaders:
-        Authorization:
-          required: true
-          description: Bearer JWT token
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -59,7 +57,7 @@ paths:
                     type: boolean
                   msg:
                     type: string
-                    summary: Always empty
+                    description: Always empty
                   data:
                     type: object
                     properties:
@@ -69,7 +67,7 @@ paths:
                         type: string
                       password:
                         type: string
-                        summary: Always empty
+                        description: Always empty
                       email:
                         type: string
                       nickname:
@@ -79,3 +77,9 @@ paths:
         '404':
           description: User not found
 
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
